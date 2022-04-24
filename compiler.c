@@ -104,6 +104,8 @@ void program() {
 int eval() {
     int op, *tmp;
     while (1) {
+        op = *pc++;  // get next operation code
+
         if (op == IMM) {
             ax = *pc++;  // load immediate value to ax
         } else if (op == LC) {
