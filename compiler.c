@@ -87,6 +87,17 @@ void expression(int level) {
 }
 
 /**
+ * @brief for syntax analysis entry, analyze the entire C language program
+ */
+void program() {
+    next();  // get next token
+    while (token > 0) {
+        printf("token is: %c\n", token);
+        next();
+    }
+}
+
+/**
  * @brief the entry point of the virtual machine,
  * used to interpret the object code
  */
@@ -119,6 +130,92 @@ int eval() {
             // jump if ax is not equal to zero
             pc = ax ? (int*)*pc : pc + 1;
         } else if (op == CALL) {
+            *--sp = (int)(pc + 1);  // store following address into stack
+            pc = (int*)*pc;         // call subroutine to function address
+        }
+        /**
+         * return from subroutine
+         * else if (op == REF) {
+         *     pc = (int*)*sp++;
+         * }
+         */
+        else if (op == ENT) {
+            // make new call frame
+            *--sp = (int)bp;  // store the current base pointer
+            bp = sp;          // base pointer will be the current stack pointer
+            sp = sp - *pc++;  // set some place for local variable
+        } else if (op == ADJ) {
+            // remove argument from frame
+            sp = sp + *sp++;
+        } else if (op == LEV) {
+            // restore call frame and PC
+            // no need additional REF instruction
+            sp = bp;           // reset the sp
+            bp = (int*)*sp++;  // recover the bp from stack
+            pc = (int*)*sp++;  // ?? where is the pc info come from
+        } else if (op == LEA) {
+            // load address for the arguments
+            ax = (int)(bp + *pc++);
+        }
+        // operator instruction set, from c4
+        // The first parameter is placed at the top of the stack, and the second
+        // parameter is placed in ax
+        else if (op == OR) {
+            ax = *sp++ | ax;
+        } else if (op == XOR) {
+            ax = *sp++ ^ ax;
+        } else if (op == AND) {
+            ax = *sp++ & ax;
+        } else if (op == EQ) {
+            ax = *sp++ == ax;
+        } else if (op == NE) {
+            ax = *sp++ != ax;
+        } else if (op == LT) {
+            ax = *sp++ < ax;
+        } else if (op == LE) {
+            ax = *sp++ <= ax;
+        } else if (op == GT) {
+            ax = *sp++ > ax;
+        } else if (op == GE) {
+            ax = *sp++ >= ax;
+        } else if (op == SHL) {
+            ax = *sp++ << ax;
+        } else if (op == SHR) {
+            ax = *sp++ >> ax;
+        } else if (op == ADD) {
+            ax = *sp++ + ax;
+        } else if (op == SUB) {
+            ax = *sp++ - ax;
+        } else if (op == MUL) {
+            ax = *sp++ * ax;
+        } else if (op == DIV) {
+            ax = *sp++ / ax;
+        } else if (op == MOD) {
+            ax = *sp++ % ax;
+        }
+        // some build in function
+        else if (op == EXIT) {
+            printf("exit(%d)\n", *sp);
+            return *sp;
+        } else if (op == OPEN) {
+            ax = open((char*)sp[1], sp[0]);
+        } else if (op == CLOS) {
+            ax = close(*sp);
+        } else if (op == READ) {
+            ax = read(sp[2], (char*)sp[1], *sp);
+        } else if (op == PRTF) {
+            tmp = sp + pc[1];
+            ax = printf((char*)tmp[-1], tmp[-2], tmp[-3], tmp[-4], tmp[-5],
+                        tmp[-6]);
+        } else if (op == MALC) {
+            ax = (int)malloc(*sp);
+        } else if (op == MSET) {
+            ax = (int)memset((char*)sp[2], sp[1], *sp);
+        } else if (op == MCMP) {
+            ax = memcmp((char*)sp[2], (char*)sp[1], *sp);
+        } else {
+            printf("unknown instruction:%d\n", op);
+            return -1;
         }
     }
     return 0;
@@ -178,6 +275,20 @@ int main(int argc, char* argv[]) {
     bp = sp = (int*)((int)stack + poolsize);
     ax = 0;
 
+    // ! only for testing
+    i = 0;
+    text[i++] = IMM;
+    text[i++] = 10;
+    text[i++] = PUSH;
+    text[i++] = IMM;
+    text[i++] = 20;
+    text[i++] = ADD;
+    text[i++] = PUSH;
+    text[i++] = EXIT;
+
+    pc = text;
+    // ! only for testing
+
     program();
-    return 0;
+    return eval();
 }
