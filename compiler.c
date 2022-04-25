@@ -135,6 +135,10 @@ int *current_id,  // current parsed ID
 // fields of identifier
 enum { Token, Hash, Name, Type, Class, Value, BType, BClass, BValue, IdSize };
 
+// types of variable/function
+enum { CHAR, INT, PTR };
+int* idmain;  // the `main` function
+
 // for lexical analysis, get the next token, it will automatically ignore
 // whitespace characters
 void next() {
@@ -367,11 +371,48 @@ void expression(int level) {
     // do nothing
 }
 
-// for syntax analysis entry, analyze the entire C language program
-void program() {
-    next();  // get next token
-    while (token > 0) {
-        global_declaration();
+// used for check and automatically go next
+void match(int tk) {
+    if (token == tk) {
+        next();
+    } else {
+        printf("%d: expected token: %d\n", line, tk);
+        exit(-1);
+    }
+}
+
+void function_declaration() {
+    // todo coming soon
+}
+
+void enum_declaration() {
+    // parse enum [id] { a = 1, b = 3, ...}
+    int i;
+    i = 0;
+    while (token != '}') {
+        if (token != Id) {
+            printf("%d: bad enum identifier %d\n", line, token);
+            exit(-1);
+        }
+        next();
+        if (token == Assign) {
+            // like {a=1}
+            next();
+            if (token != Num) {
+                printf("%d: bad enum initializer\n", line);
+                exit(-1);
+            }
+            i = token_val;
+            next();
+        }
+
+        current_id[Class] = Num;
+        current_id[Type] = INT;
+        current_id[Value] = i++;
+
+        if (token == ',') {
+            next();
+        }
     }
 }
 
@@ -462,48 +503,11 @@ void global_declaration() {
     next();  // ; }
 }
 
-void enum_declaration() {
-    // parse enum [id] { a = 1, b = 3, ...}
-    int i;
-    i = 0;
-    while (token != '}') {
-        if (token != Id) {
-            printf("%d: bad enum identifier %d\n", line, token);
-            exit(-1);
-        }
-        next();
-        if (token == Assign) {
-            // like {a=1}
-            next();
-            if (token != Num) {
-                printf("%d: bad enum initializer\n", line);
-                exit(-1);
-            }
-            i = token_val;
-            next();
-        }
-
-        current_id[Class] = Num;
-        current_id[Type] = INT;
-        current_id[Value] = i++;
-
-        if (token == ',') {
-            next();
-        }
-    }
-}
-
-void function_declaration() {
-    // todo coming soon
-}
-
-// used for check and automatically go next
-void match(int tk) {
-    if (token == tk) {
-        next();
-    } else {
-        printf("%d: expected token: %d\n", line, tk);
-        exit(-1);
+// for syntax analysis entry, analyze the entire C language program
+void program() {
+    next();  // get next token
+    while (token > 0) {
+        global_declaration();
     }
 }
 
@@ -627,10 +631,6 @@ int eval() {
     }
     return 0;
 }
-
-// types of variable/function
-enum { CHAR, INT, PTR };
-int* idmain;  // the `main` function
 
 // the main function
 int main(int argc, char* argv[]) {
