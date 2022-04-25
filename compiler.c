@@ -369,11 +369,7 @@ void next() {
  * @param level
  */
 void expression(int level) {
-    next();  // get next token
-    while (token > 0) {
-        printf("token is %c\n", token);
-        next();
-    }
+    // do nothing
 }
 
 /**
@@ -560,10 +556,15 @@ int main(int argc, char* argv[]) {
         printf("could not malloc(%d) for stack segment area\n", poolsize);
         return -1;
     }
+    if (!(symbols = malloc(poolsize))) {
+        printf("could not malloc(%d) for symbol table\n", poolsize);
+        return -1;
+    }
 
     memset(text, 0, poolsize);
     memset(data, 0, poolsize);
     memset(stack, 0, poolsize);
+    memset(symbols, 0, poolsize);
 
     // initialize the registers
     // the stack starts from high address to low address
@@ -598,5 +599,6 @@ int main(int argc, char* argv[]) {
     idmain = current_id;  // keep track of main
 
     program();
+
     return eval();
 }
