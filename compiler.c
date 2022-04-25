@@ -429,7 +429,9 @@ void global_declaration() {
             exit(-1);
         }
 
-        // ?? not should about this part
+        // this current_id will be changed by next function
+        // it will automatically move to next identifier space or the existing
+        // identifier in symbol table
         if (current_id[Class]) {
             // identifier exists
             printf("%d: duplicate global declaration\n", line);
@@ -457,7 +459,7 @@ void global_declaration() {
             match(',');
         }
     }
-    next();
+    next();  // ; }
 }
 
 void enum_declaration() {
