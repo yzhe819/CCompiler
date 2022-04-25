@@ -378,7 +378,7 @@ void expression(int level) {
 void program() {
     next();  // get next token
     while (token > 0) {
-        printf("token is: %c\n", token);
+        printf("token is: %3d('%c')\n", token, token);
         next();
     }
 }
@@ -522,26 +522,7 @@ int main(int argc, char* argv[]) {
     argv++;
 
     poolsize = 256 * 1024;
-
-    // open the source file
-    if ((fd = open(*argv, 0)) < 0) {
-        printf("could not open(%s)\n", *argv);
-        return -1;
-    }
-
-    // init the segment and stack space
-    if (!(src = old_src = malloc(poolsize))) {
-        printf("could not malloc(%d) for source area\n", poolsize);
-        return -1;
-    }
-
-    // read the source file
-    if ((i = read(fd, src, poolsize - 1)) <= 0) {
-        printf("read() returned %d\n", i);
-        return -1;
-    }
-    src[i] = 0;  // add EOF character
-    close(fd);
+    line = 1;
 
     // allocate memory for initializing the virtual machine
     if (!(text = old_text = malloc(poolsize))) {
@@ -597,6 +578,26 @@ int main(int argc, char* argv[]) {
     current_id[Token] = Char;  // handle void type
     next();
     idmain = current_id;  // keep track of main
+
+    // open the source file
+    if ((fd = open(*argv, 0)) < 0) {
+        printf("could not open(%s)\n", *argv);
+        return -1;
+    }
+
+    // init the segment and stack space
+    if (!(src = old_src = malloc(poolsize))) {
+        printf("could not malloc(%d) for source area\n", poolsize);
+        return -1;
+    }
+
+    // read the source file
+    if ((i = read(fd, src, poolsize - 1)) <= 0) {
+        printf("read() returned %d\n", i);
+        return -1;
+    }
+    src[i] = 0;  // add EOF character
+    close(fd);
 
     program();
 
