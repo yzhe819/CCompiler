@@ -597,20 +597,6 @@ int main(int argc, char* argv[]) {
     next();
     idmain = current_id;  // keep track of main
 
-    // ! only for testing
-    i = 0;
-    text[i++] = IMM;
-    text[i++] = 10;
-    text[i++] = PUSH;
-    text[i++] = IMM;
-    text[i++] = 20;
-    text[i++] = ADD;
-    text[i++] = PUSH;
-    text[i++] = EXIT;
-
-    pc = text;
-    // ! only for testing
-
     program();
     return eval();
 }
