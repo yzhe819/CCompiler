@@ -135,10 +135,8 @@ int *current_id,  // current parsed ID
 // fields of identifier
 enum { Token, Hash, Name, Type, Class, Value, BType, BClass, BValue, IdSize };
 
-/**
- * @brief for lexical analysis, get the next token, it will automatically ignore
- * whitespace characters
- */
+// for lexical analysis, get the next token, it will automatically ignore
+// whitespace characters
 void next() {
     char* last_pos;
     int hash;
@@ -364,17 +362,12 @@ void next() {
     return;
 }
 
-/**
- * @brief for parsing an expression
- * @param level
- */
+// for parsing an expression
 void expression(int level) {
     // do nothing
 }
 
-/**
- * @brief for syntax analysis entry, analyze the entire C language program
- */
+// for syntax analysis entry, analyze the entire C language program
 void program() {
     next();  // get next token
     while (token > 0) {
@@ -383,10 +376,7 @@ void program() {
     }
 }
 
-/**
- * @brief the entry point of the virtual machine,
- * used to interpret the object code
- */
+// the entry point of the virtual machine, used to interpret the object code
 int eval() {
     int op, *tmp;
     while (1) {
@@ -421,12 +411,10 @@ int eval() {
             *--sp = (int)(pc + 1);  // store following address into stack
             pc = (int*)*pc;         // call subroutine to function address
         }
-        /**
-         * return from subroutine
-         * else if (op == REF) {
-         *     pc = (int*)*sp++;
-         * }
-         */
+        // return from subroutine, replaced by LEV
+        // else if (op == REF) {
+        //     pc = (int*)*sp++;
+        // }
         else if (op == ENT) {
             // make new call frame
             *--sp = (int)bp;  // store the current base pointer
@@ -513,9 +501,7 @@ int eval() {
 enum { CHAR, INT, PTR };
 int* idmain;  // the `main` function
 
-/**
- * @brief the main function
- */
+// the main function
 int main(int argc, char* argv[]) {
     int i, fd;
     argc--;
