@@ -139,6 +139,9 @@ enum { Token, Hash, Name, Type, Class, Value, BType, BClass, BValue, IdSize };
 enum { CHAR, INT, PTR };
 int* idmain;  // the `main` function
 
+int basetype;   // the type of a declaration, make it global for convenience
+int expr_type;  // the type of an expression
+
 // for lexical analysis, get the next token, it will automatically ignore
 // whitespace characters
 void next() {
@@ -381,8 +384,155 @@ void match(int tk) {
     }
 }
 
+int index_of_bp;  // index of bp pointer on stack
+void function_parameter() {
+    // parameter_decl ::= type {'*'} id {',' type {'*'} id}
+    int type;
+    int params = 0;
+
+    while (token != ')') {
+        type = INT;  // init type
+        if (token == Int) {
+            match(Int);
+        } else if (token == Char) {
+            type = CHAR;
+            match(Char);
+        }
+
+        // pointer type
+        while (token == Mul) {
+            match(Mul);
+            type = type + PTR;
+        }
+
+        // parameter name
+        if (token != Id) {
+            printf("%d: bad parameter declaration\n", line);
+            exit(-1);
+        }
+        // declarated the local variable
+        if (current_id[Class] == Loc) {
+            printf("%d: duplicate parameter declaration\n", line);
+            exit(-1);
+        }
+
+        match(Id);
+
+        // store the local variable
+        current_id[BClass] = current_id[Class];
+        current_id[Class] = Loc;
+        current_id[BType] = current_id[Type];
+        current_id[Type] = type;
+        current_id[BValue] = current_id[Value];
+        current_id[Value] = params++;  // index of current parameter
+
+        if (token == ',') {
+            match(',');
+        }
+    }
+
+    // ??
+    index_of_bp = params + 1;
+}
+
+void statement() {
+    // todo
+}
+
+void function_body() {
+    // body_decl ::= {variable_decl}, {statement}
+    // type func_name (...) {...}
+    //                   -->|   |<--
+
+    // ... {
+    // 1. local declarations
+    // 2. statements
+    // }
+
+    int pos_local;  // position of local variables on the stack.
+    int type;
+    pos_local = index_of_bp;  // new base pointer
+
+    while (token == Int || token == Char) {
+        // local variable declaration
+        basetype = (token == Int) ? INT : CHAR;
+        match(token);
+
+        while (token != ';') {
+            type = basetype;
+            while (token == Mul) {
+                match(Mul);
+                type = type + PTR;
+            }
+
+            if (token != Id) {
+                // invalid declaration
+                printf("%d: bad local declaration\n", line);
+                exit(-1);
+            }
+            if (current_id[Class] == Loc) {
+                // identifier exists
+                printf("%d: duplicate local declaration\n", line);
+                exit(-1);
+            }
+            match(Id);
+
+            // store the local variable
+            current_id[BClass] = current_id[Class];
+            current_id[Class] = Loc;
+            current_id[BType] = current_id[Type];
+            current_id[Type] = type;
+            current_id[BValue] = current_id[Value];
+            current_id[Value] = ++pos_local;  // index of current parameter
+
+            if (token == ',') {
+                match(',');
+            }
+        }
+        match(';');
+
+        // rext is the memory address of function, which is in
+        // code segment (also used in global declaration)
+
+        *++text = ENT;                      // start the function body
+        *++text = pos_local - index_of_bp;  // local variable size
+
+        // statements
+        while (token != '}') {
+            statement();
+        }
+
+        *++text = LEV;  // emit code for leaving the sub function
+    }
+}
+
 void function_declaration() {
-    // todo coming soon
+    // function_decl ::= type {'*'} id '(' parameter_decl ')' '{' body_decl '}'
+    // type func_name (...) {...}
+    //               | this part
+
+    match('(');
+    function_parameter();
+    match(')');
+
+    match('{');
+    function_body();
+    // not match the final }, while leave the while loop in global declartion to
+    // handle it
+    // match('}');
+
+    // unwind local variable declarations for all local variables.
+    current_id = symbols;
+    // need to do this operation for all the global value
+    while (current_id[token]) {
+        if (current_id[Class] == Loc) {
+            // recover the global value
+            current_id[Class] = current_id[BClass];
+            current_id[Type] = current_id[BType];
+            current_id[Value] = current_id[BValue];
+        }
+        current_id = current_id + IdSize;
+    }
 }
 
 void enum_declaration() {
@@ -416,8 +566,6 @@ void enum_declaration() {
     }
 }
 
-int basetype;   // the type of a declaration, make it global for convenience
-int expr_type;  // the type of an expression
 void global_declaration() {
     // EBNF
     // global_declaration ::= enum_decl | variable_decl | function_decl
