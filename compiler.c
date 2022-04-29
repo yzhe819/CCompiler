@@ -161,8 +161,8 @@ void next() {
             while (*src != 0 && *src != '\n') {
                 src++;
             }
-        } else if ((*src >= 'a' && *src <= 'z') ||
-                   (*src >= 'A' && *src <= 'Z') || (*src == '_')) {
+        } else if ((token >= 'a' && token <= 'z') ||
+                   (token >= 'A' && token <= 'Z') || (token == '_')) {
             // parse identifier
             last_pos = src - 1;
             // init the hash value
@@ -199,7 +199,7 @@ void next() {
             token = current_id[Token] = Id;    // this is an identifier
 
             return;
-        } else if (*src >= '0' && *src <= '9') {
+        } else if (token >= '0' && token <= '9') {
             // parse number, three kinds: dec(123) hex(0x123) oct(017)
             token_val = token - '0';
             if (token_val > 0) {
@@ -1065,7 +1065,8 @@ void function_body() {
             statement();
         }
 
-        *++text = LEV;  // emit code for leaving the sub function
+        // emit code for leaving the sub function
+        *++text = LEV;
     }
 }
 
