@@ -144,7 +144,7 @@ int expr_type;  // the type of an expression
 
 int index_of_bp;  // index of bp pointer on stack
 
-int debug = 1;  // active debug model
+int debug;  // active debug model
 
 // for lexical analysis, get the next token, it will automatically ignore
 // whitespace characters
@@ -1257,7 +1257,7 @@ int eval() {
             ax = *(char*)* sp++ = ax;
         } else if (op == SI) {
             // save integer to address, value in ax, address on stack
-            ax = *(int*)sp++ = ax;
+            *(int*)*sp++ = ax;
         } else if (op == PUSH) {
             *--sp = ax;  // push the current value into the stack
         } else if (op == JMP) {
@@ -1285,7 +1285,7 @@ int eval() {
             sp = sp - *pc++;  // set some place for local variable
         } else if (op == ADJ) {
             // remove argument from frame
-            sp = sp + *sp++;
+            sp = sp + *pc++;
         } else if (op == LEV) {
             // restore call frame and PC
             // no need additional REF instruction
