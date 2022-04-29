@@ -144,6 +144,8 @@ int expr_type;  // the type of an expression
 
 int index_of_bp;  // index of bp pointer on stack
 
+int debug = 1;  // active debug model
+
 // for lexical analysis, get the next token, it will automatically ignore
 // whitespace characters
 void next() {
@@ -1226,8 +1228,22 @@ void program() {
 // the entry point of the virtual machine, used to interpret the object code
 int eval() {
     int op, *tmp;
+    cycle = 0;
     while (1) {
+        cycle++;
         op = *pc++;  // get next operation code
+
+        // print debug info
+        if (debug) {
+            printf("%d> %.4s", cycle,
+                   & "LEA ,IMM ,JMP ,CALL,JZ  ,JNZ ,ENT ,ADJ ,LEV ,LI  ,LC  ,SI  ,SC  ,PUSH,"
+                   "OR  ,XOR ,AND ,EQ  ,NE  ,LT  ,GT  ,LE  ,GE  ,SHL ,SHR ,ADD ,SUB ,MUL ,DIV ,MOD ,"
+                   "OPEN,READ,CLOS,PRTF,MALC,MSET,MCMP,EXIT"[op * 5]);
+            if (op <= ADJ)
+                printf(" %d\n", *pc);
+            else
+                printf("\n");
+        }
 
         if (op == IMM) {
             ax = *pc++;  // load immediate value to ax
