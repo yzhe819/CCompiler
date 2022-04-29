@@ -180,7 +180,7 @@ void next() {
             // looking for existing identifier from symbol table
             current_id = symbols;
             // this while loop is used to check all the existing token
-            while (current_id[token]) {
+            while (current_id[Token]) {
                 // check the hash value and each char
                 if (current_id[Hash] == hash &&
                     !memcmp((char*)current_id[Name], last_pos,
