@@ -1053,21 +1053,21 @@ void function_body() {
             }
         }
         match(';');
-
-        // rext is the memory address of function, which is in
-        // code segment (also used in global declaration)
-
-        *++text = ENT;                      // start the function body
-        *++text = pos_local - index_of_bp;  // local variable size
-
-        // statements
-        while (token != '}') {
-            statement();
-        }
-
-        // emit code for leaving the sub function
-        *++text = LEV;
     }
+
+    // rext is the memory address of function, which is in
+    // code segment (also used in global declaration)
+
+    *++text = ENT;                      // start the function body
+    *++text = pos_local - index_of_bp;  // local variable size
+
+    // statements
+    while (token != '}') {
+        statement();
+    }
+
+    // emit code for leaving the sub function
+    *++text = LEV;
 }
 
 void function_declaration() {
