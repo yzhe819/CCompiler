@@ -5,6 +5,7 @@
 
 // related to source code
 int token;            // current token
+int token_val;        // value of current token (mainly for number)
 char *src, *old_src;  // pointer to source code
 int poolsize;         // the default size of the data/text/stack
 int line;             // line number
@@ -14,6 +15,10 @@ int *text,      // text segment
     *old_text,  // for dump text segment
     *stack;     // stack
 char* data;     // data segment
+
+// related to main function and debug
+int* idmain;  // the `main` function
+int debug;    // active debug model
 
 // related to virtual machine registers
 // bp: base pointer
@@ -128,7 +133,6 @@ enum {
 // ----+-----+----+----+----+-----+-----+-----+------+------+----
 //     |<---       one single identifier                --->|
 
-int token_val;    // value of current token (mainly for number)
 int *current_id,  // current parsed ID
     *symbols;     // symbol table
 
@@ -137,14 +141,11 @@ enum { Token, Hash, Name, Type, Class, Value, BType, BClass, BValue, IdSize };
 
 // types of variable/function
 enum { CHAR, INT, PTR };
-int* idmain;  // the `main` function
 
 int basetype;   // the type of a declaration, make it global for convenience
 int expr_type;  // the type of an expression
 
 int index_of_bp;  // index of bp pointer on stack
-
-int debug;  // active debug model
 
 // for lexical analysis, get the next token, it will automatically ignore
 // whitespace characters
