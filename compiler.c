@@ -1087,7 +1087,7 @@ void function_declaration() {
     // unwind local variable declarations for all local variables.
     current_id = symbols;
     // need to do this operation for all the global value
-    while (current_id[token]) {
+    while (current_id[Token]) {
         if (current_id[Class] == Loc) {
             // recover the global value
             current_id[Class] = current_id[BClass];
