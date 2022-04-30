@@ -1151,13 +1151,15 @@ void global_declaration() {
         match(Enum);
         if (token != '{') {
             match(Id);  // skip the [id] part
-        } else {
+        }
+
+        if (token == '{') {
             match('{');
             enum_declaration();
             match('}');
         }
 
-        match('{');
+        match(';');
         return;
     }
 
