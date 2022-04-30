@@ -6,6 +6,7 @@ int failed_count;
 char* test_class;
 
 int ZERO, MINUS_ONE, ONE, INT_MAX, INT_MIN;
+int TRUE, FALSE;
 
 enum { A, B, C, D };
 enum named { a = 3, b, c = 2, d = 1 };
@@ -17,6 +18,10 @@ void init() {
     ONE = 1;
     INT_MAX = 2147483647;
     INT_MIN = -2147483648;
+
+    // boolean
+    TRUE = 1;
+    FALSE = 0;
 }
 
 void test(int expected, int actual) {
@@ -32,6 +37,10 @@ void test(int expected, int actual) {
 void before(char* type) {
     test_class = type;
     local_count = 1;
+}
+
+void analyze() {
+    printf("Tests run: %3d,  Failures: %3d\n", total_count, failed_count);
 }
 
 #pragma GCC diagnostic ignored "-Woverflow"
@@ -223,41 +232,110 @@ void test_operator() {
     test(2, a / b);
     test(1, a % b);
 
+    before((char*)"operator |");
+
+    before((char*)"operator ^");
+
+    before((char*)"operator &");
+
+    before((char*)"operator !");
+
     before((char*)"operator < > <= >= != ==");
     a = b = 5;
     c = 10;
 
-    test(1, a == b);
-    test(0, a == c);
-    test(0, a > b);
-    test(0, a > c);
-    test(1, a < c);
-    test(0, a != b);
-    test(1, a != c);
-    test(1, a >= b);
-    test(0, a >= c);
-    test(1, a <= b);
-    test(1, a <= c);
+    test(TRUE, a == b);
+    test(FALSE, a == c);
+    test(FALSE, a > b);
+    test(FALSE, a > c);
+    test(TRUE, a < c);
+    test(FALSE, a != b);
+    test(TRUE, a != c);
+    test(TRUE, a >= b);
+    test(FALSE, a >= c);
+    test(TRUE, a <= b);
+    test(TRUE, a <= c);
+
+    before((char*)"operator ? :");
+    a = 2;
+    b = 3;
+
+    test(2, TRUE ? a : b);
+    test(3, FALSE ? a : b);
+
+    before((char*)"operator || &&");
+    a = 0;
+    b = 1;
+    c = -1;
+    test(1, a || b);
+    test(0, a || a);
+    test(1, b || c);
+    test(1, c || c);  // failed
+
+    test(FALSE, a && b);
+    test(FALSE, a && a);
+    test(TRUE, b && c);  // failed
+    test(TRUE, c && c);  // failed
+
+    before((char*)"operator << >>");
+
+    before((char*)"operator & [] *");
+}
+
+void test_pointer() {
+    int i, *p, **pp, ***ppp;
+
+    before((char*)"pointer");
+    i = 0;
+    p = &i;
+    pp = &p;
+    ppp = &pp;
+
+    test((int)&i, (int)p);
+    test((int)&p, (int)pp);
+    test((int)&pp, (int)ppp);
+
+    test(i, (int)*p);
+    test((int)p, (int)*pp);
+    test((int)pp, (int)*ppp);
+    test(i, (int)***ppp);
+
+    test(i, (int)*&*&*p);
 }
 
 void test_expression() {
     before((char*)"expression");
 }
 
-void test_pointer() {
-    before((char*)"pointer");
-}
+void test_control_flows() {
+    int a, b;
+    before((char*)"while loop");
+    a = 0;
+    b = 1;
+    while (a++ < 20) {
+        test(b, a);
+        b = b + 1;
+    }
+    test(21, a);
 
-void test_recursive() {
-    before((char*)"recursive");
+    before((char*)"if else");
+    a = 0;
+    while (a < 20) {
+        a++;
+        if (a % 2) {
+            test(TRUE, a % 2);
+        } else {
+            test(FALSE, a % 2);
+        }
+    }
 }
 
 void test_function() {
     before((char*)"function");
 }
 
-void test_control_flows() {
-    before((char*)"control flows");
+void test_recursive() {
+    before((char*)"recursive");
 }
 
 int main() {
@@ -266,10 +344,11 @@ int main() {
     test_number();
     test_enum();
     test_operator();
-    test_expression();
     test_pointer();
-    test_recursive();
-    test_function();
+    test_expression();
     test_control_flows();
+    test_function();
+    test_recursive();
+    analyze();
     return 0;
 }
