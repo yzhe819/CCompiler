@@ -190,7 +190,54 @@ void test_enum() {
 }
 
 void test_operator() {
-    before((char*)"operator");
+    int a, b, c, d;
+
+    before((char*)"operator =");
+    a = 5;
+    b = a;
+    test(5, a);
+    test(a, b);
+
+    b = a = 6;
+    test(6, a);
+    test(a, b);
+
+    before((char*)"operator ++ --");
+    a = 1;
+    test(1, a++);
+    test(2, a);
+    test(3, ++a);
+    test(3, a);
+    test(3, a--);
+    test(2, a);
+    test(1, --a);
+    test(1, a);
+
+    before((char*)"operator + - * / \%");
+    a = 9;
+    b = 4;
+
+    test(13, a + b);
+    test(5, a - b);
+    test(36, a * b);
+    test(2, a / b);
+    test(1, a % b);
+
+    before((char*)"operator < > <= >= != ==");
+    a = b = 5;
+    c = 10;
+
+    test(1, a == b);
+    test(0, a == c);
+    test(0, a > b);
+    test(0, a > c);
+    test(1, a < c);
+    test(0, a != b);
+    test(1, a != c);
+    test(1, a >= b);
+    test(0, a >= c);
+    test(1, a <= b);
+    test(1, a <= c);
 }
 
 void test_expression() {
