@@ -877,7 +877,8 @@ void expression(int level) {
 void function_parameter() {
     // parameter_decl ::= type {'*'} id {',' type {'*'} id}
     int type;
-    int params = 0;
+    int params;
+    params = 0;
 
     while (token != ')') {
         type = INT;  // init type
@@ -1113,7 +1114,7 @@ void enum_declaration() {
         }
         next();
         if (token == Assign) {
-            // like {a=1}
+            // like {a=10}
             next();
             if (token != Num) {
                 printf("%d: bad enum initializer\n", line);
@@ -1364,7 +1365,7 @@ int eval() {
 }
 
 // the main function
-int main(int argc, char* argv[]) {
+int main(int argc, char** argv) {
     int i, fd;
     int* tmp;
 
