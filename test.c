@@ -34,20 +34,31 @@ void test(int expected, int actual) {
            expected != actual ? " ============> failed" : "");
 }
 
-void before(char* type) {
+void assert(char* type) {
     test_class = type;
     local_count = 1;
 }
 
 void analyze() {
-    printf("Tests run: %3d,  Failures: %3d\n", total_count, failed_count);
+    printf("+----+-------+-------+-------+-------+-------+-------+----+\n");
+    if (failed_count) {
+        printf("Tests run: %3d,  Failures: %3d\n", total_count, failed_count);
+    } else {
+        printf("OK (%3d tests)\n", total_count);
+    }
+    printf("+----+-------+-------+-------+-------+-------+-------+----+\n");
 }
 
 #pragma GCC diagnostic ignored "-Woverflow"
+void test_char() {
+    assert((char*)"char");
+    // todo
+}
+
 void test_number() {
     int a, b, c;
 
-    before((char*)"decimal number");
+    assert((char*)"decimal number");
     a = 0;
 
     test(ZERO, a);
@@ -81,7 +92,7 @@ void test_number() {
     test(a + 1, b);
     test(a + 2, c);
 
-    before((char*)"octal number");
+    assert((char*)"octal number");
     a = 00;
 
     test(ZERO, a);
@@ -115,7 +126,7 @@ void test_number() {
     test(a + 1, b);
     test(a + 2, c);
 
-    before((char*)"hexadecimal number");
+    assert((char*)"hexadecimal number");
     a = 0x0;
 
     test(ZERO, a);
@@ -185,7 +196,7 @@ void test_number() {
 }
 
 void test_enum() {
-    before((char*)"enum");
+    assert((char*)"enum");
 
     test(0, A);
     test(1, B);
@@ -198,10 +209,20 @@ void test_enum() {
     test(1, d);
 }
 
+void test_sizeOf() {
+    char a;
+    int b;
+
+    assert((char*)"sizeof");
+
+    test(1, sizeof(a));
+    test(4, sizeof(b));
+}
+
 void test_operator() {
     int a, b, c, d;
 
-    before((char*)"operator =");
+    assert((char*)"operator =");
     a = 5;
     b = a;
     test(5, a);
@@ -211,7 +232,7 @@ void test_operator() {
     test(6, a);
     test(a, b);
 
-    before((char*)"operator ++ --");
+    assert((char*)"operator ++ --");
     a = 1;
     test(1, a++);
     test(2, a);
@@ -222,7 +243,7 @@ void test_operator() {
     test(1, --a);
     test(1, a);
 
-    before((char*)"operator + - * / \%");
+    assert((char*)"operator + - * / \%");
     a = 9;
     b = 4;
 
@@ -232,15 +253,15 @@ void test_operator() {
     test(2, a / b);
     test(1, a % b);
 
-    before((char*)"operator |");
+    assert((char*)"operator |");
 
-    before((char*)"operator ^");
+    assert((char*)"operator ^");
 
-    before((char*)"operator &");
+    assert((char*)"operator &");
 
-    before((char*)"operator !");
+    assert((char*)"operator !");
 
-    before((char*)"operator < > <= >= != ==");
+    assert((char*)"operator < > <= >= != ==");
     a = b = 5;
     c = 10;
 
@@ -256,14 +277,14 @@ void test_operator() {
     test(TRUE, a <= b);
     test(TRUE, a <= c);
 
-    before((char*)"operator ? :");
+    assert((char*)"operator ? :");
     a = 2;
     b = 3;
 
     test(2, TRUE ? a : b);
     test(3, FALSE ? a : b);
 
-    before((char*)"operator || &&");
+    assert((char*)"operator || &&");
     a = 0;
     b = 1;
     c = -1;
@@ -277,15 +298,15 @@ void test_operator() {
     test(TRUE, b && c);  // failed
     test(TRUE, c && c);  // failed
 
-    before((char*)"operator << >>");
+    assert((char*)"operator << >>");
 
-    before((char*)"operator & [] *");
+    assert((char*)"operator & [] *");
 }
 
 void test_pointer() {
     int i, *p, **pp, ***ppp;
 
-    before((char*)"pointer");
+    assert((char*)"pointer");
     i = 0;
     p = &i;
     pp = &p;
@@ -304,12 +325,12 @@ void test_pointer() {
 }
 
 void test_expression() {
-    before((char*)"expression");
+    assert((char*)"expression");
 }
 
 void test_control_flows() {
     int a, b;
-    before((char*)"while loop");
+    assert((char*)"while loop");
     a = 0;
     b = 1;
     while (a++ < 20) {
@@ -318,31 +339,62 @@ void test_control_flows() {
     }
     test(21, a);
 
-    before((char*)"if else");
+    assert((char*)"if else");
     a = 0;
-    while (a < 20) {
-        a++;
-        if (a % 2) {
-            test(TRUE, a % 2);
-        } else {
-            test(FALSE, a % 2);
-        }
+    b = 1;
+    if (a) {
+        test(TRUE, a);
+    } else {
+        test(FALSE, a);
+    }
+
+    if (b) {
+        test(TRUE, b);
+    } else {
+        test(FALSE, b);
     }
 }
 
+int func1(int x) {
+    return x * x;
+}
+
+void func2(int a, int b, int c) {
+    test(2 * 3 * 4, a * b * c);
+}
+
+void func3() {
+    printf("Hello world\n");
+}
+
 void test_function() {
-    before((char*)"function");
+    int a;
+    assert((char*)"function");
+    a = func1(3);
+    func2(2, 3, 4);
+    func3();
+}
+
+int factorial(int i) {
+    if (i < 2) {
+        return i;
+    } else {
+        return i * factorial(i - 1);
+    }
 }
 
 void test_recursive() {
-    before((char*)"recursive");
+    assert((char*)"recursive");
+    test(3628800, factorial(10));
 }
 
 int main() {
     total_count = failed_count = 0;
     init();
+    test_char();
     test_number();
     test_enum();
+    test_sizeOf();
     test_operator();
     test_pointer();
     test_expression();

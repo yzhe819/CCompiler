@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+// #define int long long  // support 64 bit system
+
 // related to source code
 int token;            // current token
 int token_val;        // value of current token (mainly for number)
