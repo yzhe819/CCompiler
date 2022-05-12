@@ -209,16 +209,6 @@ void test_enum() {
     test(1, d);
 }
 
-void test_sizeOf() {
-    char a;
-    int b;
-
-    assert((char*)"sizeof");
-
-    test(1, sizeof(a));
-    test(4, sizeof(b));
-}
-
 void test_operator() {
     int a, b, c, d;
 
@@ -394,7 +384,6 @@ int main() {
     test_char();
     test_number();
     test_enum();
-    test_sizeOf();
     test_operator();
     test_pointer();
     test_expression();
